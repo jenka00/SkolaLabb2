@@ -53,47 +53,11 @@ namespace SkolaLabb2
             {
                 Console.WriteLine("Klass: {0} \tElevnamn: {1} {2} Lärarnamn: {3} {4}", p.cName, p.sFName, p.sLName, p.tFName, p.tLName);
             }
-
-            //FUNKAR INTE
-            //var subjCourse = (from cou in Context.Courses
-            //                  join couSub in Context.CourseSubjects
-            //                  on cou.CourseID equals couSub.CourseID
-            //                  join sub in Context.Subjects
-            //                  on couSub.SubjectID equals sub.SubjectID
-            //                  into SubjectGroup
-            //                  select new { cou, SubjectGroup });
-            //foreach (var course in subjCourse)
-            //{
-            //    Console.WriteLine("Kurs {0}", course.cou.CourseName);
-            //    foreach (var subject in course.SubjectGroup)
-            //    {
-            //        Console.WriteLine("Ämne {0}", subject.SubjectName);
-            //    }
-            //}
-
-
-            //FUNKAR INTE
-            //var StudAndTeach = (from stud in Context.Students
-            //                    join cou in Context.Courses
-            //                    on stud.CourseID equals cou.CourseID
-            //                    into StudGroup
-            //                    //join couSub in Context.CourseSubjects
-            //                    //on stud.CourseID equals couSub.CourseID
-            //                    //join sub in Context.Subjects
-            //                    //on couSub.SubjectID equals sub.SubjectID
-            //                    select new
-            //                    { stud, StudGroup });
-            //foreach (var p in StudAndTeach)
-            //{
-            //    Console.WriteLine("Klass: {0}", p.stud.StudentFName);
-            //    foreach (var s in p.StudGroup)
-            //    {
-            //        Console.WriteLine("Elev: {1}", s.CourseName);
-            //    }
-            //}
+            Console.WriteLine("------------------------------------------------------");
+            Console.ReadKey();
 
             //KOLLA OM SUBJECT INNEHÅLLER PROGRAMMERING 1
-            List < Subject > checkSub = (from sub in Subject.GetAllSubjects()
+            List <Subject> checkSub = (from sub in Subject.GetAllSubjects()
                                          where sub.SubjectName.Contains("Programmering 1")
                                          select sub).ToList();
             if (checkSub.Count > 0)
@@ -110,38 +74,91 @@ namespace SkolaLabb2
             Console.ReadKey();
             Console.WriteLine("------------------------------------------------------");
 
+            //Teacher t5 = new Teacher() { TeacherFName = "Bertil", TeacherLName = "Jönsson" };
+            //Context.Teachers.Add(t5);
+            //Context.SaveChanges();
+
+            //// UPPDATERA ETT ÄMNE
+            //var updateSubj = Context.Subjects.Where(n => n.SubjectName == "Programmering 2").ToList();
+            //foreach (var update in updateSubj)
+            //{
+            //    update.SubjectName = "OOP";
+            //}
+
+            //Context.SaveChanges();
+            //Console.ReadKey();
+            //Console.WriteLine("------------------------------------------------------");
+
+            ////ÄNDRAR NAMNET PÅ ELEVENS LÄRARE FRÅN ANAS TILL REIDAR
+            //Console.WriteLine("Ange studentnummer: ");
+            //int chosenStudent = Convert.ToInt32(Console.ReadLine());
+
+            //var checkAndChangeTeach = (from teach in Context.Teachers
+            //                           join teachSub in Context.TeacherSubjects
+            //                           on teach.TeacherID equals teachSub.TeacherID
+            //                           join couSub in Context.CourseSubjects
+            //                           on teachSub.SubjectID equals couSub.SubjectID
+            //                           join stud in Context.Students
+            //                           on couSub.CourseID equals stud.CourseID
+            //                           where teach.TeacherFName == "Anas" && stud.StudentID == chosenStudent
+            //                           select teach);
+
+            //foreach (var t in checkAndChangeTeach)
+            //{               
+            //    t.TeacherFName = "Reidar";
+            //    t.TeacherLName = "Andersson";
+            //}
+            //Context.SaveChanges();
+
+            //Console.ReadKey();
+            //Console.WriteLine("------------------------------------------------------");
+
             //ÄNDRAR NAMNET PÅ ELEVENS LÄRARE FRÅN ANAS TILL REIDAR
             Console.WriteLine("Ange studentnummer: ");
             int chosenStudent = Convert.ToInt32(Console.ReadLine());
 
-            var checkAndChangeTeach = (from teach in Context.Teachers
-                                       join teachSub in Context.TeacherSubjects
-                                       on teach.TeacherID equals teachSub.TeacherID
+            var checkAndChangeTeach = (from teachSub in Context.TeacherSubjects
                                        join couSub in Context.CourseSubjects
                                        on teachSub.SubjectID equals couSub.SubjectID
                                        join stud in Context.Students
                                        on couSub.CourseID equals stud.CourseID
-                                       where teach.TeacherFName == "Anas" && stud.StudentID == chosenStudent
-                                       select teach);
+                                       where teachSub.TeacherID == 10 && stud.StudentID == chosenStudent
+                                       select teachSub);
 
             foreach (var t in checkAndChangeTeach)
             {
-                t.TeacherFName = "Reidar";
-                t.TeacherLName = "Andersson";
+                t.TeacherID = 2;
             }
             Context.SaveChanges();
 
-            Console.ReadKey();
+            Console.WriteLine("------------------------------------------------------");         
+
+            //VISA ELEVER MED DERAS LÄRARE
+            StudAndTeach =      (from cou in Context.Courses
+                                join stud in Context.Students
+                                on cou.CourseID equals stud.CourseID
+                                join couSub in Context.CourseSubjects
+                                on stud.CourseID equals couSub.CourseID
+                                join teachSub in Context.TeacherSubjects
+                                on couSub.SubjectID equals teachSub.SubjectID
+                                join teach in Context.Teachers on
+                                teachSub.TeacherID equals teach.TeacherID
+                                where stud.StudentID == chosenStudent
+                                select new
+                                {
+                                    cName = cou.CourseName,
+                                    sFName = stud.StudentFName,
+                                    sLName = stud.StudentLName,
+                                    tFName = teach.TeacherFName,
+                                    tLName = teach.TeacherLName
+                                }).Distinct();
+            foreach (var p in StudAndTeach)
+            {
+                Console.WriteLine("Klass: {0} \tElevnamn: {1} {2} Lärarnamn: {3} {4}", p.cName, p.sFName, p.sLName, p.tFName, p.tLName);
+            }
             Console.WriteLine("------------------------------------------------------");
+            Console.ReadKey();
 
-            /////UPPDATERA ETT ÄMNE            
-            //var updateSubj = Context.Subjects.Where(n => n.SubjectName == "Avancerad.NET").ToList();
-            //foreach (var update in updateSubj)
-            //{
-            //    update.SubjectName = "Programmering 2";
-            //}
-
-            //Context.SaveChanges();
 
             //var S = (from s in Context.Subjects
             //        select new
@@ -182,15 +199,16 @@ namespace SkolaLabb2
 
             //var t1 = Context.Teachers.Where(t => t.TeacherFName == "Anas").FirstOrDefault();
 
-            //if(t1 is Teacher)
+            //if (t1 is Teacher)
             //{
             //    t1.TeacherFName = "Reidar";
             //    t1.TeacherLName = "Eriksson";
-            //    t1.TeacherID = 1;                
+            //    t1.TeacherID = 1;
             //}
 
             //Context.SaveChanges();
 
+            ////BYTER LÄRARE I ETT VISST ÄMNE
             //var changeTeachName = (from teach in Context.Teachers 
             //                        join teachSub in Context.TeacherSubjects
             //                        on teach.TeacherID equals teachSub.TeacherID
@@ -202,6 +220,44 @@ namespace SkolaLabb2
             //{
 
             //    //Context.Teachers.Update(teacher.TeacherFName == "Reidar", teacher.TeacherLName == "Andersson");
+            //}
+
+            //FUNKAR INTE --- GROUP JOIN FÖR ATT VISA KURS MED SINA ÄMNEN
+            //var subjCourse = (from cou in Context.Courses
+            //                  join couSub in Context.CourseSubjects
+            //                  on cou.CourseID equals couSub.CourseID
+            //                  join sub in Context.Subjects
+            //                  on couSub.SubjectID equals sub.SubjectID
+            //                  into SubjectGroup
+            //                  select new { cou, SubjectGroup });
+            //foreach (var course in subjCourse)
+            //{
+            //    Console.WriteLine("Kurs {0}", course.cou.CourseName);
+            //    foreach (var subject in course.SubjectGroup)
+            //    {
+            //        Console.WriteLine("Ämne {0}", subject.SubjectName);
+            //    }
+            //}
+
+
+            //FUNKAR INTE --- GROUP JOIN FÖR ATT VISA KLASS MED SINA ELEVER
+            //var StudAndTeach = (from stud in Context.Students
+            //                    join cou in Context.Courses
+            //                    on stud.CourseID equals cou.CourseID
+            //                    into StudGroup
+            //                    //join couSub in Context.CourseSubjects
+            //                    //on stud.CourseID equals couSub.CourseID
+            //                    //join sub in Context.Subjects
+            //                    //on couSub.SubjectID equals sub.SubjectID
+            //                    select new
+            //                    { stud, StudGroup });
+            //foreach (var p in StudAndTeach)
+            //{
+            //    Console.WriteLine("Klass: {0}", p.stud.StudentFName);
+            //    foreach (var s in p.StudGroup)
+            //    {
+            //        Console.WriteLine("Elev: {1}", s.CourseName);
+            //    }
             //}
         }
     }
